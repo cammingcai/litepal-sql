@@ -19,9 +19,11 @@ package org.litepal.litepalsample.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.litepal.crud.DataSupport;
 import org.litepal.litepalsample.R;
 import org.litepal.litepalsample.adapter.DataArrayAdapter;
 import org.litepal.litepalsample.model.Singer;
+import org.litepal.litepalsample.model.User;
 import org.litepal.tablemanager.Connector;
 
 import android.app.Activity;
@@ -29,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -81,13 +84,19 @@ public class SaveSampleActivity extends Activity implements OnClickListener {
 		switch (v.getId()) {
 		case R.id.save_btn:
 			try {
-				Singer singer = new Singer();
-				singer.setName(mSingerNameEdit.getText().toString());
-				singer.setAge(Integer.parseInt(mSingerAgeEdit.getText().toString()));
-				singer.setMale(Boolean.parseBoolean(mSingerGenderEdit.getText().toString()));
-				singer.save();
-				refreshListView(singer.getId(), singer.getName(), singer.getAge(),
-						singer.isMale() ? 1 : 0);
+				User user = new User();
+				user.setAddress("setAddress");
+				user.setIconUrl("setIconUrl");
+				user.setGradeid(11111);
+				user.setName("name");
+				user.setPhone("135");
+				user.setSex("nv");
+				user.setToken("token");
+				user.save();
+				refreshListView(user.getId(), user.getName(), user.getPhone(),
+						user.getGradeid(),user.getSex(),user.getAddress(),user.getIconUrl(),user.getToken());
+
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				Toast.makeText(this, getString(R.string.error_param_is_not_valid),
@@ -108,51 +117,92 @@ public class SaveSampleActivity extends Activity implements OnClickListener {
 				List<String> columnList = new ArrayList<String>();
 				columnList.add("id");
 				columnList.add("name");
-				columnList.add("age");
-				columnList.add("ismale");
+				columnList.add("phone");
+				columnList.add("gradeid");
+				columnList.add("sex");
+				columnList.add("address");
+				columnList.add("iconUrl");
+				columnList.add("token");
 				mList.add(columnList);
-				Cursor cursor = null;
-				try {
-					cursor = Connector.getDatabase().rawQuery("select * from singer order by id",
-							null);
-					if (cursor.moveToFirst()) {
-						do {
-							long id = cursor.getLong(cursor.getColumnIndex("id"));
-							String name = cursor.getString(cursor.getColumnIndex("name"));
-							int age = cursor.getInt(cursor.getColumnIndex("age"));
-							int isMale = cursor.getInt(cursor.getColumnIndex("ismale"));
-							List<String> stringList = new ArrayList<String>();
-							stringList.add(String.valueOf(id));
-							stringList.add(name);
-							stringList.add(String.valueOf(age));
-							stringList.add(String.valueOf(isMale));
-							mList.add(stringList);
-						} while (cursor.moveToNext());
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					if (cursor != null) {
-						cursor.close();
-					}
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							mProgressBar.setVisibility(View.GONE);
-							mAdapter.notifyDataSetChanged();
-						}
-					});
+
+				List<User>  users = DataSupport.findAll(User.class);
+
+				Log.i("save","users="+users);
+				for (User user:users){
+					List<String> stringList = new ArrayList<String>();
+					stringList.add(String.valueOf(user.getId()));
+					stringList.add(user.getName());
+					stringList.add(user.getPhone());
+					stringList.add(String.valueOf(user.getGradeid()));
+							stringList.add(user.getSex());
+							stringList.add(user.getAddress());
+							stringList.add(user.getIconUrl());
+							stringList.add(user.getToken());
+					mList.add(stringList);
 				}
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						mProgressBar.setVisibility(View.GONE);
+						mAdapter.notifyDataSetChanged();
+					}
+				});
+//				Cursor cursor = null;
+//				try {
+//
+//					cursor = Connector.getDatabase().rawQuery("select * from user order by id",
+//							null);
+//					if (cursor.moveToFirst()) {
+//						do {
+//							int id = cursor.getInt(cursor.getColumnIndex("id"));
+//							String name = cursor.getString(cursor.getColumnIndex("name"));
+//							String phone = cursor.getString(cursor.getColumnIndex("phone"));
+//							int gradeid = cursor.getInt(cursor.getColumnIndex("gradeid"));
+//							String sex = cursor.getString(cursor.getColumnIndex("sex"));
+//							String address = cursor.getString(cursor.getColumnIndex("address"));
+//							String iconUrl = cursor.getString(cursor.getColumnIndex("iconUrl"));
+//							String token = cursor.getString(cursor.getColumnIndex("token"));
+//							List<String> stringList = new ArrayList<String>();
+//							stringList.add(String.valueOf(id));
+//							stringList.add(name);
+//							stringList.add(phone);
+//							stringList.add(String.valueOf(gradeid));
+//							stringList.add(sex);
+//							stringList.add(address);
+//							stringList.add(iconUrl);
+//							stringList.add(token);
+//							mList.add(stringList);
+//						} while (cursor.moveToNext());
+//					}
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				} finally {
+//					if (cursor != null) {
+//						cursor.close();
+//					}
+//	runOnUiThread(new Runnable() {
+//				@Override
+//				public void run() {
+//					mProgressBar.setVisibility(View.GONE);
+//					mAdapter.notifyDataSetChanged();
+//				}
+//			});
+//				}
 			}
 		}).start();
 	}
 
-	private void refreshListView(long id, String name, int age, int isMale) {
+	private void refreshListView(int id, String name, String phone, int gradeid
+			, String sex, String address, String iconUrl, String token) {
 		List<String> stringList = new ArrayList<String>();
 		stringList.add(String.valueOf(id));
 		stringList.add(name);
-		stringList.add(String.valueOf(age));
-		stringList.add(String.valueOf(isMale));
+		stringList.add(phone);
+		stringList.add(String.valueOf(gradeid));
+		stringList.add(sex);
+		stringList.add(address);
+		stringList.add(iconUrl);
+		stringList.add(token);
 		mList.add(stringList);
 		mAdapter.notifyDataSetChanged();
 		mDataListView.setSelection(mList.size());
